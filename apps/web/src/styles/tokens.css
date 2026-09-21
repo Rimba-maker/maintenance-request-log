@@ -1,0 +1,102 @@
+/*
+ * Design tokens. Every colour, size and radius used by the UI comes from here.
+ * Direction: Swiss-style minimalism for a dense internal tool. Operational green,
+ * incident red, maintenance amber. Fira Sans for text, Fira Code for machine IDs.
+ * Light values are the default; dark values follow the OS setting.
+ */
+:root {
+  color-scheme: light dark;
+
+  --font-sans: 'Fira Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Fira Code', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+
+  /* Surfaces and text */
+  --bg: #f3f7f4;
+  --surface: #ffffff;
+  --surface-2: #f7faf8;
+  --text: #10231a;
+  --text-muted: #4b5b53;
+  --border: #d6e2da;
+  --border-strong: #b3c6ba;
+  --input-border: #748c7d; /* 3:1 against surfaces, so form fields stay visible (WCAG 1.4.11) */
+  --overlay: rgb(8 20 13 / 0.55);
+
+  /* Actions */
+  --primary: #15803d;
+  --primary-hover: #166534;
+  --on-primary: #ffffff;
+  --danger: #b91c1c;
+  --danger-hover: #991b1b;
+  --on-danger: #ffffff;
+  --focus: #1d4ed8;
+
+  /* Badge tones: background / foreground pairs */
+  --tone-neutral-bg: #edf2ee;
+  --tone-neutral-fg: #3a4740;
+  --tone-success-bg: #dcfce7;
+  --tone-success-fg: #14532d;
+  --tone-warn-bg: #fef3c7;
+  --tone-warn-fg: #7c3a06;
+  --tone-danger-bg: #fee2e2;
+  --tone-danger-fg: #991b1b;
+  --tone-info-bg: #dbeafe;
+  --tone-info-fg: #1e3a8a;
+  --tone-orange-bg: #ffedd5;
+  --tone-orange-fg: #9a3412;
+  --tone-violet-bg: #ede9fe;
+  --tone-violet-fg: #5b21b6;
+  --tone-ink-bg: #10231a;
+  --tone-ink-fg: #f3f7f4;
+
+  /* Shape and depth */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --shadow: 0 1px 2px rgb(16 35 26 / 0.06), 0 1px 3px rgb(16 35 26 / 0.05);
+  --shadow-lg: 0 12px 32px rgb(16 35 26 / 0.18);
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --fast: 140ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b130e;
+    --surface: #121c16;
+    --surface-2: #17231c;
+    --text: #e6f0ea;
+    --text-muted: #9db3a6;
+    --border: #243629;
+    --border-strong: #37503f;
+    --input-border: #5f8069;
+    --overlay: rgb(0 0 0 / 0.65);
+
+    --primary: #22c55e;
+    --primary-hover: #4ade80;
+    --on-primary: #052e16;
+    --danger: #f87171;
+    --danger-hover: #fca5a5;
+    --on-danger: #2a0808;
+    --focus: #7cb3ff;
+
+    --tone-neutral-bg: #1f2c25;
+    --tone-neutral-fg: #c4d4cb;
+    --tone-success-bg: #103820;
+    --tone-success-fg: #86efac;
+    --tone-warn-bg: #3a2a08;
+    --tone-warn-fg: #fcd34d;
+    --tone-danger-bg: #3f1618;
+    --tone-danger-fg: #fca5a5;
+    --tone-info-bg: #12284a;
+    --tone-info-fg: #93c5fd;
+    --tone-orange-bg: #40200b;
+    --tone-orange-fg: #fdba74;
+    --tone-violet-bg: #2a1b4d;
+    --tone-violet-fg: #c4b5fd;
+    --tone-ink-bg: #e6f0ea;
+    --tone-ink-fg: #0b130e;
+
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.55);
+  }
+}
