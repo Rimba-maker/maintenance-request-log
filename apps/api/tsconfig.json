@@ -9,5 +9,5 @@
     "esModuleInterop": true,
     "types": ["node"]
   },
-  "include": ["src", "tests", "drizzle.config.ts"]
+  "include": ["src", "tests", "scripts", "drizzle.config.ts"]
 }
