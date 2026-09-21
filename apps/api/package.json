@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Maintenance Request Log API (Hono + Drizzle + PostgreSQL)",
   "scripts": {
+    "test": "vitest run",
     "dev": "tsx watch --env-file-if-exists=../../.env src/index.ts",
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
