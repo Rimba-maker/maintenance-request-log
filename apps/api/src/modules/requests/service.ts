@@ -47,7 +47,9 @@ export function createRequestsService(repo: RequestsRepo) {
       if (!can.editRequest(actor, request)) throw forbidden()
 
       await repo.update(id, patch)
-      return (await repo.findById(id))!
+      const updated = await repo.findById(id)
+      if (!updated) throw notFound('Request')
+      return updated
     },
 
     async review(actor: Actor, id: string, decision: 'approved' | 'rejected') {
@@ -57,7 +59,9 @@ export function createRequestsService(repo: RequestsRepo) {
       if (request.status === decision) throw conflict(`Request is already ${decision}`)
 
       await repo.review(id, { from: request.status, to: decision, reviewedBy: actor.id })
-      return (await repo.findById(id))!
+      const updated = await repo.findById(id)
+      if (!updated) throw notFound('Request')
+      return updated
     },
 
     async remove(actor: Actor, id: string) {
