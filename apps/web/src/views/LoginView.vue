@@ -21,7 +21,8 @@ async function submit() {
   error.value = ''
   try {
     await signIn(email.value, password.value)
-    await router.push(typeof route.query.redirect === 'string' ? route.query.redirect : '/')
+    const redirect = route.query.redirect
+    await router.push(typeof redirect === 'string' && redirect.startsWith('/') ? redirect : '/')
   } catch (e) {
     error.value = errorMessage(e)
   } finally {
