@@ -5,6 +5,9 @@ import { hashPassword } from '../auth/password.js'
 import type { CreateUserInput, UpdateUserInput } from './schema.js'
 import type { UserRecord, UsersRepo } from './repo.js'
 
+/** True for a Postgres unique-constraint violation, however Drizzle/node-postgres wraps it. */
+const isUniqueViolation = (err: unknown) => (err as { cause?: { code?: string } } | undefined)?.cause?.code === '23505'
+
 /** A user as exposed by the API: never includes the password hash. */
 export const toPublicUser = ({ id, email, role, active, createdAt }: UserRecord) => ({
   id,
@@ -30,8 +33,13 @@ export function createUsersService(repo: UsersRepo) {
       if (await repo.findByEmail(input.email)) throw conflict('Email already in use')
 
       const { password, ...rest } = input
-      const user = await repo.insert({ ...rest, passwordHash: await hashPassword(password) })
-      return toPublicUser(user)
+      try {
+        const user = await repo.insert({ ...rest, passwordHash: await hashPassword(password) })
+        return toPublicUser(user)
+      } catch (err) {
+        if (isUniqueViolation(err)) throw conflict('Email already in use')
+        throw err
+      }
     },
 
     async update(actor: Actor, id: string, input: UpdateUserInput) {
@@ -49,11 +57,16 @@ export function createUsersService(repo: UsersRepo) {
       }
 
       const { password, ...rest } = input
-      const user = await repo.update(id, {
-        ...rest,
-        ...(password && { passwordHash: await hashPassword(password) }),
-      })
-      return toPublicUser(user!)
+      try {
+        const user = await repo.update(id, {
+          ...rest,
+          ...(password && { passwordHash: await hashPassword(password) }),
+        })
+        return toPublicUser(user!)
+      } catch (err) {
+        if (isUniqueViolation(err)) throw conflict('Email already in use')
+        throw err
+      }
     },
   }
 }
