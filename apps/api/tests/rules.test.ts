@@ -50,6 +50,36 @@ describe('authentication', () => {
     expect(row!.passwordHash).not.toBe('Admin123!')
     expect(row!.passwordHash).toMatch(/^\$2[aby]\$/)
   })
+
+  it(
+    'blocks further attempts from the same IP after too many logins, with a Retry-After header',
+    async () => {
+      const attacker = t.client('', { 'x-forwarded-for': 'rate-limit-test-ip' })
+      for (let i = 0; i < 20; i++) {
+        expect((await attacker.post('/auth/login', { email: 'nobody@example.com', password: 'nope' })).status).toBe(401)
+      }
+      const blocked = await attacker.post('/auth/login', { email: 'nobody@example.com', password: 'nope' })
+      expect(blocked.status).toBe(429)
+      expect(blocked.headers.get('retry-after')).toBeTruthy()
+    },
+    15_000,
+  )
+
+  it(
+    'keys the rate limit on the last X-Forwarded-For hop (nginx appends, never overwrites), not a spoofable earlier one',
+    async () => {
+      // Different fake first hops, same real last hop: nginx would produce this for one attacker
+      // cycling a spoofed header, so both must land in the same bucket rather than dodging the limit.
+      const realIp = 'shared-real-ip'
+      const a = t.client('', { 'x-forwarded-for': `1.2.3.4, ${realIp}` })
+      const b = t.client('', { 'x-forwarded-for': `9.9.9.9, ${realIp}` })
+      for (let i = 0; i < 10; i++) await a.post('/auth/login', { email: 'nobody@example.com', password: 'nope' })
+      for (let i = 0; i < 10; i++) await b.post('/auth/login', { email: 'nobody@example.com', password: 'nope' })
+      const blocked = await b.post('/auth/login', { email: 'nobody@example.com', password: 'nope' })
+      expect(blocked.status).toBe(429)
+    },
+    15_000,
+  )
 })
 
 describe('deactivated users (Q-6)', () => {

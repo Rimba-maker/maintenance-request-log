@@ -4,13 +4,14 @@ import { z } from 'zod'
 import type { AppEnv } from '../../shared/http.js'
 import { emailSchema, validate } from '../../shared/validate.js'
 import type { AuthService } from './service.js'
+import { loginRateLimit } from './rateLimit.js'
 import { SESSION_COOKIE, SESSION_SECONDS } from './token.js'
 
 const loginSchema = z.object({ email: emailSchema, password: z.string().min(1) })
 
 export const authRoutes = (service: AuthService, requireAuth: MiddlewareHandler<AppEnv>, cookieSecure: boolean) =>
   new Hono<AppEnv>()
-    .post('/login', validate('json', loginSchema), async (c) => {
+    .post('/login', loginRateLimit, validate('json', loginSchema), async (c) => {
       const { email, password } = c.req.valid('json')
       const { user, token } = await service.login(email, password)
 

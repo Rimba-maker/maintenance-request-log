@@ -1,6 +1,6 @@
 import { compare, hash, hashSync } from 'bcryptjs'
 
-const COST = 10
+const COST = 12
 
 export const hashPassword = (password: string) => hash(password, COST)
 

@@ -15,12 +15,16 @@ export async function createTestApp() {
 
   const app = createApp({ db, jwtSecret: 'test-secret-test-secret-test-secret-1234', cookieSecure: false })
 
-  /** Calls the API in-process, optionally with a session cookie. */
-  const client = (cookie = '') => {
+  /** Calls the API in-process, optionally with a session cookie and extra headers (e.g. a fake client IP). */
+  const client = (cookie = '', extraHeaders: Record<string, string> = {}) => {
     const send = (method: string, path: string, body?: unknown) =>
       app.request(`/api${path}`, {
         method,
-        headers: { ...(body !== undefined && { 'content-type': 'application/json' }), ...(cookie && { cookie }) },
+        headers: {
+          ...(body !== undefined && { 'content-type': 'application/json' }),
+          ...(cookie && { cookie }),
+          ...extraHeaders,
+        },
         body: body === undefined ? undefined : JSON.stringify(body),
       })
     return {
