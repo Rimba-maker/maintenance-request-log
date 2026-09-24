@@ -1,4 +1,4 @@
-import { boolean, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { boolean, index, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { PRIORITIES, ROLES, STATUSES } from '../domain/types.js'
 
 export const roleEnum = pgEnum('role', ROLES)
@@ -14,30 +14,41 @@ export const users = pgTable('users', {
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 })
 
-export const requests = pgTable('requests', {
-  id: uuid().primaryKey().defaultRandom(),
-  machineId: text().notNull(),
-  description: text().notNull(),
-  priority: priorityEnum().notNull().default('medium'),
-  status: statusEnum().notNull().default('submitted'),
-  createdBy: uuid()
-    .notNull()
-    .references(() => users.id, { onDelete: 'restrict' }),
-  createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-  reviewedBy: uuid().references(() => users.id, { onDelete: 'restrict' }),
-  reviewedAt: timestamp({ withTimezone: true }),
-})
+export const requests = pgTable(
+  'requests',
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    machineId: text().notNull(),
+    description: text().notNull(),
+    priority: priorityEnum().notNull().default('medium'),
+    status: statusEnum().notNull().default('submitted'),
+    createdBy: uuid()
+      .notNull()
+      .references(() => users.id, { onDelete: 'restrict' }),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    reviewedBy: uuid().references(() => users.id, { onDelete: 'restrict' }),
+    reviewedAt: timestamp({ withTimezone: true }),
+  },
+  (t) => [index('requests_created_by_idx').on(t.createdBy), index('requests_reviewed_by_idx').on(t.reviewedBy)],
+)
 
 /** Audit trail: one row per status change, including the initial "submitted". */
-export const requestStatusHistory = pgTable('request_status_history', {
-  id: uuid().primaryKey().defaultRandom(),
-  requestId: uuid()
-    .notNull()
-    .references(() => requests.id, { onDelete: 'cascade' }),
-  fromStatus: statusEnum(),
-  toStatus: statusEnum().notNull(),
-  changedBy: uuid()
-    .notNull()
-    .references(() => users.id, { onDelete: 'restrict' }),
-  changedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-})
+export const requestStatusHistory = pgTable(
+  'request_status_history',
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    requestId: uuid()
+      .notNull()
+      .references(() => requests.id, { onDelete: 'cascade' }),
+    fromStatus: statusEnum(),
+    toStatus: statusEnum().notNull(),
+    changedBy: uuid()
+      .notNull()
+      .references(() => users.id, { onDelete: 'restrict' }),
+    changedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('request_status_history_request_id_idx').on(t.requestId),
+    index('request_status_history_changed_by_idx').on(t.changedBy),
+  ],
+)
